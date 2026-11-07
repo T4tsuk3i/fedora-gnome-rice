@@ -1,0 +1,88 @@
+# Ghostty config
+# Docs: ghostty.org/docs/config/reference
+
+# Appearance
+# Typecraft's actual Catppuccin Mocha palette, not Ghostty's built-in
+# approximation. Resolves from ~/.config/ghostty/themes/Typecraft Mocha.
+# Biggest visible differences: bright colors match their normal counterparts,
+# and selection highlight is rosewater rather than muted slate.
+theme = Typecraft Mocha
+# Built-in themes are matched by display name, not slug.
+# See all 463 with: ghostty +list-themes
+
+# Font
+font-family = JetBrainsMono Nerd Font
+font-size = 14
+font-thicken = true
+
+# Faster wheel scrolling (was 0.95 in the backup).
+mouse-scroll-multiplier = precision:1,discrete:3
+
+# Glassy background. background-blur is what gives the frosted-glass feel --
+# without it, opacity alone is just flat transparency.
+background-opacity = 0.9
+background-blur = false
+# Make translucency apply to app-drawn cells too (tmux, neovim). Left off so
+# text stays crisp on an opaque cell background.
+# background-opacity-cells = true
+
+# NOTE: no background-image here on purpose. To show an image *in* the terminal
+# instead of behind it, the shell banner draws it via the Kitty graphics
+# protocol: see the banner block in ~/.zshrc, or run `fastfetch` by hand.
+
+# Window size at launch, in character cells (0 = let the desktop decide).
+# Wide enough that the 34-column banner logo and the readout sit side by side.
+window-width = 112
+window-height = 34
+
+# Window decorations and tabs
+#
+# Keep this minimal. `gtk-titlebar = true` plus `window-show-tab-bar` with the
+# default `native` style stacks a titlebar AND a separate tab bar, which reads as
+# a window inside a window. The tab bar is left on `auto` so it stays hidden
+# until a second tab actually exists, leaving one titlebar.
+#
+# There is no new-tab "+" button to be had here: DecorationButtonType on the
+# KWin side is a fixed enum, and Ghostty's own request for one is unimplemented
+# upstream. Tabs and splits are keybind-only.
+window-decoration = auto
+gtk-titlebar = true
+window-show-tab-bar = auto
+
+# Tabs and splits. Harmless, and no extra window furniture: these add no bars.
+keybind = ctrl+shift+t=new_tab
+keybind = ctrl+shift+w=close_tab:this
+keybind = ctrl+shift+e=new_split:right
+keybind = ctrl+shift+d=new_split:down
+keybind = ctrl+shift+arrow_left=previous_tab
+keybind = ctrl+shift+arrow_right=next_tab
+keybind = super+ctrl+shift+o=close_surface
+keybind = super+ctrl+shift+enter=toggle_split_zoom
+keybind = super+ctrl+shift+e=new_split:left
+keybind = super+ctrl+shift+r=equalize_splits
+
+# Cursor
+cursor-style = block
+cursor-style-blink = false
+
+# Spacing
+window-padding-x = 8
+window-padding-y = 6
+window-padding-balance = true
+
+# Shell
+shell-integration = detect
+command = /usr/bin/zsh
+
+# Clipboard
+# Workaround for ghostty#13903 (KDE Wayland): when a TUI app (OpenCode) writes
+# the clipboard natively and again via OSC 52, Ghostty claims the selection for
+# the OSC 52 write and KWin cancels Ghostty's data source, leaving Ghostty with
+# no clipboard formats. Ctrl+Shift+V then stops being "paste" and falls through
+# to the key encoder, typing a raw Kitty sequence like "8;6u" instead. Denying
+# OSC 52 writes prevents the race. Ctrl+Shift+C/V keep working normally.
+# Trade-off: OSC 52 writes from remote apps over SSH are blocked too.
+clipboard-write = deny
+
+# Scrollback
+scrollback-limit = 10000

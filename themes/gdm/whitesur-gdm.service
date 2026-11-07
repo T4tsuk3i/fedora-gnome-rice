@@ -1,0 +1,9 @@
+[Unit]
+Description=Re-apply WhiteSur GDM login theme if a package update reset it
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/whitesur-gdm-apply
+
+[Install]
+WantedBy=multi-user.target

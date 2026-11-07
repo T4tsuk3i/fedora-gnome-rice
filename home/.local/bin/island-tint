@@ -1,0 +1,45 @@
+#!/usr/bin/env python3
+"""Tint the top-bar islands from the top strip of the current wallpaper."""
+import re, subprocess, sys, urllib.parse
+from pathlib import Path
+from PIL import Image, ImageStat
+
+CSS = Path.home() / ".themes/WhiteSur-Light/gnome-shell/gnome-shell.css"
+START, END = "/* AUTO-TINT START */", "/* AUTO-TINT END */"
+
+def gs(*a):
+    return subprocess.check_output(["gsettings", *a], text=True).strip()
+
+uri = gs("get", "org.gnome.desktop.background", "picture-uri-dark").strip("'")
+img = Image.open(urllib.parse.unquote(uri.removeprefix("file://"))).convert("RGB")
+w, h = img.size
+strip = img.crop((0, 0, w, max(1, int(h * 0.06)))).resize((64, 4))
+r, g, b = (int(x) for x in ImageStat.Stat(strip).mean)
+lum = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255
+
+if lum > 0.55:   # bright wallpaper: light glass, dark text
+    tr, tg, tb = (min(255, c + 70) for c in (r, g, b)); fg = "rgba(20,20,25,0.95)"
+else:            # dark wallpaper: dark glass, light text
+    tr, tg, tb = (int(c * 0.45) for c in (r, g, b)); fg = "white"
+
+block = f"""{START}
+#panelLeft, #panelCenter, #panelRight {{
+  background-color: rgba({tr}, {tg}, {tb}, 0.22);
+  border-color: rgba(255, 255, 255, 0.10);
+}}
+#panel .panel-button, #panel .panel-button StLabel, #panel .panel-button StIcon {{
+  color: {fg};
+  text-shadow: 0 1px 3px rgba(0,0,0,0.35);
+  icon-shadow: 0 1px 3px rgba(0,0,0,0.35);
+}}
+{END}"""
+css = CSS.read_text()
+css = re.sub(re.escape(START) + r".*?" + re.escape(END), "", css, flags=re.S).rstrip() + "\n\n" + block + "\n"
+CSS.write_text(css)
+
+if "--no-reload" not in sys.argv:
+    name = gs("get", "org.gnome.shell.extensions.user-theme", "name")
+    tmp = "WhiteSur-Dark" if "Light" in name else "WhiteSur-Light"
+    subprocess.run(["gsettings", "set", "org.gnome.shell.extensions.user-theme", "name", tmp.join("''")])
+    subprocess.run(["gsettings", "set", "org.gnome.shell.extensions.user-theme", "name", name])
+print(f"avg=({r},{g},{b}) lum={lum:.2f} -> island rgba({tr},{tg},{tb},0.22), text {fg}")

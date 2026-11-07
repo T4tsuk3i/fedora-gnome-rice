@@ -1,0 +1,9 @@
+[Unit]
+Description=Watch the GNOME Shell theme resource for package updates
+
+[Path]
+PathChanged=/usr/share/gnome-shell/gnome-shell-theme.gresource
+PathModified=/usr/share/gnome-shell
+
+[Install]
+WantedBy=multi-user.target

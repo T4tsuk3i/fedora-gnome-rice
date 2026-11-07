@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=Files
+Exec=env QT_QPA_PLATFORM=xcb QT_QPA_PLATFORMTHEME=qt6ct QT_STYLE_OVERRIDE=kvantum dolphin %u
+Icon=system-file-manager
+Type=Application
+X-DocPath=dolphin/index.html
+Categories=Qt;KDE;System;FileTools;FileManager;
+GenericName=File Manager
+Comment=Manage your files
+MimeType=inode/directory;
+InitialPreference=10
+Keywords=files;file management;file browsing;samba;network shares;explorer;finder;

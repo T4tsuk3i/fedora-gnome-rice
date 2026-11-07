@@ -1,0 +1,10 @@
+[Unit]
+Description=Nautilus FileOperations2 D-Bus shim (Dash to Dock trash)
+
+[Service]
+Type=simple
+ExecStart=/home/tatsuya/.local/bin/nautilus-trash-service
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,9 @@
+[Unit]
+Description=Re-tint top bar islands when the wallpaper changes
+
+[Service]
+ExecStart=/bin/sh -c 'gsettings monitor org.gnome.desktop.background picture-uri-dark | while read -r _; do sleep 1; %h/.local/bin/island-tint; done'
+Restart=on-failure
+
+[Install]
+WantedBy=graphical-session.target

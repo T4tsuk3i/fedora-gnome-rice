@@ -1,0 +1,10 @@
+globalmenu@ShiroOSL.github.io
+just-perfection-desktop@just-perfection
+apps-menu@gnome-shell-extensions.gcampax.github.com
+background-logo@fedorahosted.org
+appindicatorsupport@rgcjonas.gmail.com
+dash-to-dock@micxgx.gmail.com
+user-theme@gnome-shell-extensions.gcampax.github.com
+blur-my-shell@aunetx
+app-grid-tuner@m-lab
+start-app-grid@local

@@ -1,0 +1,3 @@
+[D-BUS Service]
+Name=org.gnome.Nautilus
+Exec=/home/tatsuya/.local/bin/nautilus-trash-service

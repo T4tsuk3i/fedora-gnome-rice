@@ -1,0 +1,7 @@
+{
+  "uuid": "start-app-grid@local",
+  "name": "Start in App Grid",
+  "description": "Super opens the Applications grid instead of the window overview",
+  "shell-version": ["51"],
+  "version": 1
+}

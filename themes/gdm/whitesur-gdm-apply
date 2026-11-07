@@ -1,0 +1,15 @@
+#!/bin/bash
+# Re-applies the WhiteSur GDM login theme whenever the gnome-shell package
+# replaces /usr/share/gnome-shell/gnome-shell-theme.gresource.
+set -euo pipefail
+SRC=/usr/local/share/whitesur-gdm
+TARGET=/usr/share/gnome-shell/gnome-shell-theme.gresource
+STAMP=/var/lib/whitesur-gdm.sha256
+
+cur=$(sha256sum "$TARGET" | cut -d' ' -f1)
+if [[ -f $STAMP && "$(cat "$STAMP")" == "$cur" ]]; then exit 0; fi   # already themed
+
+cd "$SRC/WhiteSur-gtk-theme"
+./tweaks.sh -g -b "$SRC/login-wallpaper.png"
+restorecon "$TARGET" 2>/dev/null || true
+sha256sum "$TARGET" | cut -d' ' -f1 > "$STAMP"

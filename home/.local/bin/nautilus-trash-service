@@ -1,0 +1,59 @@
+#!/usr/bin/python3
+"""Minimal stand-in for Nautilus' FileOperations2 D-Bus service.
+
+Dash to Dock hardcodes org.gnome.Nautilus for its "Empty Trash" dock action.
+Nautilus is not installed here (Dolphin is the file manager), so this service
+implements just EmptyTrash so the dock action keeps working.
+
+Started on demand through ~/.local/share/dbus-1/services/org.gnome.Nautilus.service
+and kept alive by the nautilus-trash-service systemd user unit.
+"""
+
+import subprocess
+
+import gi
+
+gi.require_version("Gio", "2.0")
+gi.require_version("GLib", "2.0")
+from gi.repository import Gio, GLib  # noqa: E402
+
+OBJECT_PATH = "/org/gnome/Nautilus/FileOperations2"
+INTERFACE = "org.gnome.Nautilus.FileOperations2"
+BUS_NAME = "org.gnome.Nautilus"
+
+XML = f"""
+<node>
+  <interface name="{INTERFACE}">
+    <method name="EmptyTrash">
+      <arg type="b" name="ask_confirmation" direction="in"/>
+      <arg type="a{{sv}}" name="platform_data" direction="in"/>
+    </method>
+  </interface>
+</node>
+"""
+
+
+def on_method_call(conn, sender, path, iface, method, params, invocation):
+    if method != "EmptyTrash":
+        invocation.return_value(None)
+        return
+
+    try:
+        subprocess.Popen(["gio", "trash", "--empty"])
+        invocation.return_value(None)
+    except Exception as exc:  # noqa: BLE001
+        invocation.return_dbus_error(f"{INTERFACE}.Error", str(exc))
+
+
+def main():
+    conn = Gio.bus_get_sync(Gio.BusType.SESSION, None)
+    node = Gio.DBusNodeInfo.new_for_xml(XML)
+    conn.register_object(OBJECT_PATH, node.interfaces[0], on_method_call, None, None)
+    Gio.bus_own_name_on_connection(
+        conn, BUS_NAME, Gio.BusNameOwnerFlags.NONE, None, None
+    )
+    GLib.MainLoop().run()
+
+
+if __name__ == "__main__":
+    main()

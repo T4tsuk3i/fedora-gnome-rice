@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Set the next wallpaper from ~/Pictures/Wallpapers, rotating daily.
+dir="$HOME/Pictures/Wallpapers"
+state="$HOME/.local/state/daily-wallpaper"
+mkdir -p "$(dirname "$state")"
+mapfile -t files < <(find "$dir" -type f \( -name '*.jpg' -o -name '*.png' \) | sort)
+(( ${#files[@]} )) || exit 1
+last=$(cat "$state" 2>/dev/null || echo -1)
+next=$(( (last + 1) % ${#files[@]} ))
+echo "$next" > "$state"
+uri="file://${files[$next]}"
+gsettings set org.gnome.desktop.background picture-uri "$uri"
+gsettings set org.gnome.desktop.background picture-uri-dark "$uri"
+gsettings set org.gnome.desktop.background picture-options zoom
+gsettings set org.gnome.desktop.screensaver picture-uri "$uri"
+gsettings set org.gnome.desktop.screensaver picture-options zoom
