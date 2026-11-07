@@ -64,6 +64,8 @@ for e in "$REPO"/extensions/*/; do
   cp -a "$e" "$HOME/.local/share/gnome-shell/extensions/$uuid"
 done
 
+"$HOME/.local/bin/cross-de-hide" || true
+
 echo "==> defaults"
 xdg-mime default org.kde.dolphin.desktop inode/directory
 update-desktop-database "$HOME/.local/share/applications" >/dev/null 2>&1 || true

@@ -1,0 +1,128 @@
+#!/usr/bin/python3
+"""Hide KDE apps in GNOME and GNOME apps in KDE.
+
+Adds user-level .desktop overrides with OnlyShowIn/NotShowIn so each
+desktop only lists its own apps. Dolphin and Ark stay visible in both
+because they are the day-to-day file manager/archive tools in GNOME.
+"""
+import glob
+import os
+import subprocess
+
+SYSTEM_APPS = "/usr/share/applications"
+USER_APPS = os.path.expanduser("~/.local/share/applications")
+EXCLUDE = {
+    "org.kde.dolphin.desktop",
+    "org.kde.ark.desktop",
+}
+KDE_PKG_PREFIXES = (
+    "kde", "plasma", "kf6", "kio", "polkit-kde", "dolphin", "ark",
+    "kate", "konsole", "okular", "gwenview", "spectacle", "discover",
+    "systemsettings", "filelight", "partitionmanager", "skanlite",
+    "kcalc", "kcharselect", "kcolorchooser", "kfind", "khelpcenter",
+    "kinfocenter", "kwalletmanager", "kwrite", "kdeconnect", "kmag",
+    "kmousetool", "kmouth", "kamera", "kruler", "ktimer", "sweeper",
+    "keditbookmarks", "kget", "krdc", "krfb", "ksshaskpass",
+    "isoimagewriter", "audiocd-kio", "kdebugsettings", "kdnssd",
+    "kdialog",
+)
+KDE_IDS = {"systemsettings.desktop", "kaccess.desktop"}
+
+
+def package(path):
+    try:
+        return subprocess.check_output(
+            ["rpm", "-qf", path], text=True, stderr=subprocess.DEVNULL
+        ).strip().splitlines()[0]
+    except Exception:
+        return ""
+
+
+def is_kde(path, text):
+    app_id = os.path.basename(path)
+    if app_id.startswith("org.kde.") or app_id.startswith("kde") or app_id in KDE_IDS:
+        return True
+    for line in text.splitlines():
+        if line.startswith("Categories=") and "KDE" in line:
+            return True
+    return package(path).startswith(KDE_PKG_PREFIXES)
+
+
+def is_gnome(path, text):
+    app_id = os.path.basename(path)
+    if app_id.startswith("org.gnome.") or app_id.startswith("gnome-") or app_id == "nautilus.desktop":
+        return True
+    return package(path).startswith(("gnome-", "nautilus"))
+
+
+def write_override(src, only, not_in):
+    app_id = os.path.basename(src)
+    dst = os.path.join(USER_APPS, app_id)
+    text = open(dst if os.path.exists(dst) else src, encoding="utf-8", errors="ignore").read()
+    if "[Desktop Entry]" not in text:
+        return False
+
+    # already hidden entirely, leave it
+    if any(l.strip() == "NoDisplay=true" for l in text.splitlines()):
+        return False
+
+    lines = text.splitlines()
+    out = []
+    inserted = False
+    has_only = any(l.startswith("OnlyShowIn=") for l in lines)
+    has_not = any(l.startswith("NotShowIn=") for l in lines)
+    for line in lines:
+        if line.startswith("OnlyShowIn="):
+            vals = [v for v in line.split("=", 1)[1].split(";") if v]
+            if only not in vals:
+                vals.append(only)
+            out.append("OnlyShowIn=" + ";".join(vals) + ";")
+        elif line.startswith("NotShowIn="):
+            vals = [v for v in line.split("=", 1)[1].split(";") if v]
+            if not_in not in vals:
+                vals.append(not_in)
+            out.append("NotShowIn=" + ";".join(vals) + ";")
+        else:
+            out.append(line)
+            if line == "[Desktop Entry]" and not has_only and not has_not:
+                out.append(f"OnlyShowIn={only};")
+                out.append(f"NotShowIn={not_in};")
+                inserted = True
+    if not (has_only or has_not or inserted):
+        return False
+    os.makedirs(USER_APPS, exist_ok=True)
+    with open(dst, "w", encoding="utf-8") as f:
+        f.write("\n".join(out) + "\n")
+    return True
+
+
+def main():
+    stats = {"kde": 0, "gnome": 0}
+    for path in sorted(glob.glob(os.path.join(SYSTEM_APPS, "*.desktop"))):
+        app_id = os.path.basename(path)
+        if not app_id or app_id in EXCLUDE:
+            continue
+        try:
+            text = open(path, encoding="utf-8", errors="ignore").read()
+        except OSError:
+            continue
+        if "[Desktop Entry]" not in text:
+            continue
+        if is_kde(path, text):
+            if write_override(path, "KDE", "GNOME"):
+                stats["kde"] += 1
+        elif is_gnome(path, text):
+            if write_override(path, "GNOME", "KDE"):
+                stats["gnome"] += 1
+    subprocess.run(["update-desktop-database", USER_APPS],
+                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    try:
+        subprocess.run(["kbuildsycoca6", "--noincremental"],
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except FileNotFoundError:
+        pass
+    print(f"hidden: {stats['kde']} KDE apps from GNOME, {stats['gnome']} GNOME apps from KDE")
+
+
+if __name__ == "__main__":
+    main()
