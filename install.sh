@@ -43,11 +43,12 @@ echo "==> configs"
 cp -a "$REPO/home/." "$HOME/"
 chmod +x "$HOME/.local/bin/island-tint" \
          "$HOME/.local/bin/daily-wallpaper" \
-         "$HOME/.local/bin/nautilus-trash-service"
+         "$HOME/.local/bin/nautilus-trash-service" \
+         "$HOME/.local/bin/gnome-gtk-restore"
 
 # make copied units/scripts portable
 for d in "$HOME/.config/systemd/user" "$HOME/.local/share/dbus-1/services" \
-         "$HOME/.config/qt6ct" "$HOME/.local/bin"; do
+         "$HOME/.config/qt6ct" "$HOME/.local/bin" "$HOME/.config/autostart"; do
   grep -rIl '/home/tatsuya' "$d" 2>/dev/null | while read -r f; do
     sed -i "s|/home/tatsuya|$HOME|g" "$f"
   done

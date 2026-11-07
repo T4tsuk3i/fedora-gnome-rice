@@ -63,3 +63,15 @@ This builds the WhiteSur GDM theme and installs a path/service that re-applies i
 - [MacTahoe icons](https://github.com/vinceliuice/MacTahoe-icon-theme) and [MacTahoe KDE](https://github.com/vinceliuice/MacTahoe-kde) — vinceliuice
 - [Global Menu for GNOME](https://github.com/ShiroOSL/global-menu-for-gnome) — ShiroOSL
 - [Just Perfection](https://gitlab.gnome.org/jrahmatzadeh/just-perfection), [Blur My Shell](https://github.com/aunetx/blur-my-shell), [Dash to Dock](https://extensions.gnome.org/extension/307/dash-to-dock/), [App Grid Tuner](https://codeberg.org/m-lab/app-grid-tuner)
+
+
+## Desktop isolation (GNOME + Plasma)
+
+Plasma is installed **Wayland-only** (`plasma.desktop`). KDE apps are hidden in
+GNOME and GNOME apps are hidden in KDE (`home/.local/bin/cross-de-hide`).
+Dolphin/Ark are intentionally shared.
+
+GTK settings are global, and KDE's `kde-gtk-config` writes Breeze into
+`~/.config/gtk-{3,4}.0/settings.ini` when you log into Plasma. `home/.local/bin/gnome-gtk-restore`
+runs from `~/.config/autostart/gnome-gtk-restore.desktop` (`OnlyShowIn=GNOME`) and
+restores the WhiteSur/MacTahoe GTK theme, icons, cursor and font at GNOME login.

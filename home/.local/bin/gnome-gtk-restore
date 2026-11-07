@@ -1,0 +1,49 @@
+#!/bin/sh
+# Restore the GNOME GTK appearance.
+#
+# KDE's kde-gtk-config writes Breeze theme/icons/cursor/font into
+# ~/.config/gtk-3.0/settings.ini and ~/.config/gtk-4.0/settings.ini when you
+# log into Plasma. Those files are shared with GTK apps, so GNOME would
+# inherit Breeze. This runs at GNOME login and puts the WhiteSur look back.
+set -eu
+
+mkdir -p "$HOME/.config/gtk-3.0" "$HOME/.config/gtk-4.0"
+
+cat > "$HOME/.config/gtk-3.0/settings.ini" <<'EOF'
+[Settings]
+gtk-application-prefer-dark-theme=false
+gtk-cursor-blink=true
+gtk-cursor-blink-time=1000
+gtk-cursor-theme-name=WhiteSur-cursors
+gtk-cursor-theme-size=24
+gtk-decoration-layout=close,minimize,maximize:
+gtk-enable-animations=true
+gtk-font-name=Adwaita Sans,  11
+gtk-icon-theme-name=MacTahoe-light
+gtk-primary-button-warps-slider=true
+gtk-sound-theme-name=freedesktop
+gtk-theme-name=WhiteSur-Light
+EOF
+
+cat > "$HOME/.config/gtk-4.0/settings.ini" <<'EOF'
+[Settings]
+gtk-application-prefer-dark-theme=false
+gtk-cursor-blink=true
+gtk-cursor-blink-time=1000
+gtk-cursor-theme-name=WhiteSur-cursors
+gtk-cursor-theme-size=24
+gtk-decoration-layout=close,minimize,maximize:
+gtk-enable-animations=true
+gtk-font-name=Adwaita Sans,  11
+gtk-icon-theme-name=MacTahoe-light
+gtk-primary-button-warps-slider=true
+gtk-sound-theme-name=freedesktop
+gtk-theme-name=WhiteSur-Light
+EOF
+
+gsettings set org.gnome.desktop.interface gtk-theme 'WhiteSur-Light'
+gsettings set org.gnome.desktop.interface icon-theme 'MacTahoe-light'
+gsettings set org.gnome.desktop.interface cursor-theme 'WhiteSur-cursors'
+gsettings set org.gnome.desktop.interface font-name 'Adwaita Sans 11'
+gsettings set org.gnome.desktop.wm.preferences button-layout 'close,minimize,maximize:'
+gsettings set org.gnome.shell.extensions.user-theme name 'WhiteSur-Light' 2>/dev/null || true

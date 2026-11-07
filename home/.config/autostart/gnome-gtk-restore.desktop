@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Restore GNOME GTK appearance
+Comment=Undo KDE kde-gtk-config changes after a Plasma session
+Exec=/home/tatsuya/.local/bin/gnome-gtk-restore
+OnlyShowIn=GNOME;
+NoDisplay=true
+X-GNOME-Autostart-enabled=true

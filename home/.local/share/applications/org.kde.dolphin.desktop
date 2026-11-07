@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=Files
-Exec=env QT_QPA_PLATFORM=xcb QT_QPA_PLATFORMTHEME=qt6ct QT_STYLE_OVERRIDE=kvantum dolphin %u
+Exec=env QT_QPA_PLATFORM=xcb QT_QPA_PLATFORMTHEME=qt6ct dolphin %u
 Icon=system-file-manager
 Type=Application
 X-DocPath=dolphin/index.html
